@@ -12,14 +12,9 @@
         Local md Files
     </h3>
     <ul>
-        {% if files %}
-            {% for link, file in files %}
-                <li><a href="/{{link}}">{{file}}</a></li>
-            {% endfor %}
-        {% else %}
-            <p>Empty directory</p>
-            <a href="/">Go home</a>
-        {% endif %}
+        {% for link, file in files %}
+            <li><a href="/{{link}}">{{file}}</a></li>
+        {% endfor %}
     </ul>
 </body>
 </html>
