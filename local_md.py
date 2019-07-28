@@ -1,15 +1,19 @@
 import argparse
+import os
 from os import walk
 from pathlib import Path, PurePath
 from docutils.core import publish_string
 
 import markdown
 
+import bottle
 from bottle import Bottle, static_file, redirect
 from bottle import jinja2_template as template
 
-DIRECTORY = None
-
+abs_app_dir_path = os.path.dirname(os.path.realpath(__file__))
+abs_views_path = os.path.join(abs_app_dir_path, 'views')
+abs_static_path = os.path.join(abs_app_dir_path, 'static')
+bottle.TEMPLATE_PATH.insert(0, abs_views_path )
 app = Bottle()
 
 
@@ -29,10 +33,10 @@ def index():
     Serves md/rst files from current directory
     """
     files = []
-    for (_, dir_names, file_names) in walk(DIRECTORY):
-        files.extend(list(map(lambda x: (DIRECTORY.joinpath(x), x), dir_names)))
+    for (_, dir_names, file_names) in walk(os.getcwd()):
+        files.extend(list(map(lambda x: (x, x), dir_names)))
         files.extend(
-            list(map(lambda x: (DIRECTORY.joinpath(x), x), filter(is_md, file_names)))
+            list(map(lambda x: (x, x), filter(is_md, file_names)))
         )
         break
     return template("index.html", files=files)
@@ -42,8 +46,7 @@ def index():
 def server_static(file_path):
     """Static files(css)
     """
-    path = PurePath(__file__).parent.joinpath("static")
-    return static_file(file_path, root=path)
+    return static_file(file_path, root=abs_static_path)
 
 
 @app.route("/<path:path>")
@@ -77,12 +80,12 @@ def serve_md(path):
         return template("index.html", files=files)
     if is_md(path):
         if ".md" in path:
-            with open(path) as md:
+            with open(Path(os.getcwd()).joinpath(path)) as md:
                 html = markdown.markdown(
-                    md.read(), extensions=["codehilite", "fenced_code"]
+                    md.read(), extensions=["codehilite", "extra"    ]
                 )
         else:
-            with open(path) as rst:
+            with open(Path(os.getcwd()).joinpath(path)) as rst:
                 html = publish_string(rst.read(), writer_name="html").decode()
         return template("markdown.html", html=html, path=path)
     else:
@@ -94,7 +97,7 @@ if __name__ == "__main__":
         description="Serve markdown/rst files in a browser as html"
     )
     parser.add_argument(
-        "--directory",
+        "directory", metavar="DIRECTORY", type=str,
         help="Serve md files from this directory, if not passed uses current directory",
     )
     parser.add_argument(
@@ -112,5 +115,5 @@ if __name__ == "__main__":
         help="Serve to use like paste, etc. Default wsgiref.",
     )
     args = parser.parse_args()
-    DIRECTORY = PurePath(args.directory) if args.directory else None
+    os.chdir(Path(args.directory).resolve())
     app.run(server=args.server, host=args.host, port=args.port)

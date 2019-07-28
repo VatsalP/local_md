@@ -21,4 +21,4 @@ optional arguments:
   --server SERVER       Serve to use like paste, etc. Default wsgiref.
 ```
 
-CSS theme used: [retro.css](https://github.com/markdowncss/retro)
+CSS theme used: [modest.css](https://github.com/markdowncss/modest)

@@ -26,5 +26,7 @@ You can test with sample directoy md_files:
 $ python local_md.py --directory md_files
 $ # and check in http://localhost:8080
 ```
+Looks like this:
+![looks like this](./static/image/Readme.md?raw=True)
 
-CSS theme used: [retro.css](https://github.com/markdowncss/retro)
+CSS theme used: [modest.css](https://github.com/markdowncss/modest)
